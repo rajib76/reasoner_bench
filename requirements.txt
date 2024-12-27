@@ -1,0 +1,3 @@
+ag2
+python-dotenv
+pydantic
