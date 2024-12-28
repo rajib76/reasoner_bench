@@ -6,15 +6,15 @@ from typing import ClassVar
 from pydantic import ConfigDict
 
 from benchmark.base_benchmark import BaseBenchmark
-from reasoner_algos.mcts_reasoner_agent import MCTSReasonerAgent
+from reasoner_algos.lats_reasoner_agent import LATSReasonerAgent
 
 
-class MCTSReasonerBenchmark(BaseBenchmark):
-    mcts_agent_class: ClassVar = MCTSReasonerAgent()
+class LATSReasonerBenchmark(BaseBenchmark):
+    lats_agent_class: ClassVar = LATSReasonerAgent()
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def return_benchmark_name(self):
-        return "mcts_benchmark"
+        return "lats_benchmark"
 
     def last_meaningful_msg(self, sender, recipient, summary_args):
         import warnings
@@ -69,10 +69,10 @@ class MCTSReasonerBenchmark(BaseBenchmark):
             if config_list is None:
                 config_list: list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
 
-            self.mcts_agent_class.config_list = config_list
-            mcts_agent = self.mcts_agent_class.return_agent()
-            user_proxy = self.mcts_agent_class.return_user_proxy()
+            self.lats_agent_class.config_list = config_list
+            lats_agent = self.lats_agent_class.return_agent()
+            user_proxy = self.lats_agent_class.return_user_proxy()
             summary_args = {"question_id": question_id, "prompt": prompt, "ground_truth": ground_truth,
                             "out_file": out_file_name}
-            user_proxy.initiate_chat(mcts_agent, message=prompt, summary_method=self.last_meaningful_msg,
+            user_proxy.initiate_chat(lats_agent, message=prompt, summary_method=self.last_meaningful_msg,
                                      summary_args=summary_args)
