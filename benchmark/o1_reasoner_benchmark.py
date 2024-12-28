@@ -19,18 +19,21 @@ class O1ReasonerBenchmark(BaseBenchmark):
         ground_truth = summary_args["ground_truth"]
         out_file = summary_args["out_file"]
         response = summary_args["response"]
-        if "json" in response:
-            cleaned_string = response.replace("```json", "").replace("```", "").strip()
-            # Convert the cleaned string to a valid dictionary
-            data = eval(cleaned_string)  # Use eval cautiously or replace with a safer parser if needed
-            cleansed_output = data.get('answer')
-            print("cleansed ", cleansed_output)
-            benchmarking_result["predicted_truth"] = cleansed_output
-        else:
-            model_answer = response
-            response_json = ast.literal_eval(json.loads(json.dumps(model_answer)))
-            benchmarking_result["predicted_truth"] = response_json["answer"]
+        answer_option, answer_explanation = self.create_structured_output(response)
+        # if "json" in response:
+        #     cleaned_string = response.replace("```json", "").replace("```", "").strip()
+        #     # Convert the cleaned string to a valid dictionary
+        #     data = eval(cleaned_string)  # Use eval cautiously or replace with a safer parser if needed
+        #     cleansed_output = data.get('answer')
+        #     print("cleansed ", cleansed_output)
+        #     benchmarking_result["predicted_truth"] = cleansed_output
+        # else:
+        #     model_answer = response
+        #     response_json = ast.literal_eval(json.loads(json.dumps(model_answer)))
+        #     benchmarking_result["predicted_truth"] = response_json["answer"]
 
+        benchmarking_result["predicted_truth"] = answer_option
+        benchmarking_result["explanantion"] = answer_explanation
         benchmarking_result["question_id"] = question_id
         benchmarking_result["prompt"] = prompt
         benchmarking_result["ground_truth"] = ground_truth
@@ -49,8 +52,8 @@ class O1ReasonerBenchmark(BaseBenchmark):
             if instructions is not None:
                 prompt = prompt + "\n" + instructions
 
-            if config_list is None:
-                config_list: list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
+            # if config_list is None:
+            #     config_list: list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
 
             self.o1_agent_class.config_list = config_list
             o1_agent = self.o1_agent_class.return_agent()

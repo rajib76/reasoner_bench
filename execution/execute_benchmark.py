@@ -14,6 +14,7 @@ from benchmark.o1_reasoner_benchmark import O1ReasonerBenchmark
 
 load_dotenv()
 
+
 class BenchMarkExecution(BaseModel):
 
     def summarize_results(self, agent_list: List[BaseBenchmark]):
@@ -62,8 +63,8 @@ class BenchMarkExecution(BaseModel):
 
 if __name__ == "__main__":
     eval_file = "../data/simple_bench_public.json"
-    # agent_list = [MCTSReasonerBenchmark(),LATSReasonerBenchmark(),BEAMReasonerBenchmark()]
-    agent_list = [O1ReasonerBenchmark()]
+    agent_list = [MCTSReasonerBenchmark(), LATSReasonerBenchmark(), BEAMReasonerBenchmark(), O1ReasonerBenchmark()]
+    # agent_list = [BEAMReasonerBenchmark()]
     # instructions = """
     # Give the final answer in the below mentioned JSON FORMAT.
     #
@@ -71,14 +72,16 @@ if __name__ == "__main__":
     #
     # REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
     # """
-    instructions = """
-    Give the final answer in the below mentioned JSON FORMAT.
+    # instructions = """
+    # Give the final answer in the below mentioned JSON FORMAT.
+    #
+    # {"answer" : "X"}
+    #
+    # REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
+    # """
 
-    {"answer" : "X"}
-
-    REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
-    """
-
+    # The config list only used for the AG2 reasoining agent. for o1 reasoner,
+    # o1-preview is harcoded in o1_reasoner_agent.py
     config_list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
 
     with open(eval_file, "r") as f:
@@ -88,7 +91,7 @@ if __name__ == "__main__":
     be = BenchMarkExecution()
     df = asyncio.run(be.run_execution(eval_data=eval_data,
                                       agent_list=agent_list,
-                                      instructions=instructions,
+                                      instructions=None,
                                       config_list=config_list))
 
     print(df.head())

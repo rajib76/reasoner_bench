@@ -34,6 +34,7 @@ class BEAMReasonerBenchmark(BaseBenchmark):
         for msg in reversed(chat_messages):
             try:
                 content = msg["content"]
+                answer_option=""
                 if isinstance(content, str):
                     summary = content.replace("TERMINATE", "")
                 elif isinstance(content, list):
@@ -42,11 +43,14 @@ class BEAMReasonerBenchmark(BaseBenchmark):
                         x["text"].replace("TERMINATE", "") for x in content if isinstance(x, dict) and "text" in x
                     )
                 if summary.strip().rstrip():
+                    answer_option,answer_explanation = self.create_structured_output(summary)
                     benchmarking_result["question_id"] = question_id
                     benchmarking_result["prompt"] = prompt
                     benchmarking_result["ground_truth"] = ground_truth
-                    summary_json = ast.literal_eval(json.loads(json.dumps(summary)))
-                    benchmarking_result["predicted_truth"] = summary_json["answer"]
+                    benchmarking_result["explanantion"] = answer_explanation
+                    # summary_json = ast.literal_eval(json.loads(json.dumps(summary)))
+                    # benchmarking_result["predicted_truth"] = summary_json["answer"]
+                    benchmarking_result["predicted_truth"] = answer_option
                     self._write_benchmark_output(benchmarking_result,out_file_name=out_file)
                     benchmarking_result = {}
                     return summary
