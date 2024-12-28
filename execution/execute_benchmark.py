@@ -3,13 +3,16 @@ import json
 import os
 from typing import List
 import pandas as pd
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from benchmark.base_benchmark import BaseBenchmark
 from benchmark.beam_reasoner_benchmark import BEAMReasonerBenchmark
 from benchmark.lats_reasoner_benchmark import LATSReasonerBenchmark
 from benchmark.mcts_reasoner_benchmark import MCTSReasonerBenchmark
+from benchmark.o1_reasoner_benchmark import O1ReasonerBenchmark
 
+load_dotenv()
 
 class BenchMarkExecution(BaseModel):
 
@@ -59,14 +62,23 @@ class BenchMarkExecution(BaseModel):
 
 if __name__ == "__main__":
     eval_file = "../data/simple_bench_public.json"
-    agent_list = [MCTSReasonerBenchmark(),LATSReasonerBenchmark(),BEAMReasonerBenchmark()]
+    # agent_list = [MCTSReasonerBenchmark(),LATSReasonerBenchmark(),BEAMReasonerBenchmark()]
+    agent_list = [O1ReasonerBenchmark()]
+    # instructions = """
+    # Give the final answer in the below mentioned JSON FORMAT.
+    #
+    # {"answer" : "X,where X is one of the letters A,B,C,D,E, or F"}
+    #
+    # REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
+    # """
     instructions = """
     Give the final answer in the below mentioned JSON FORMAT.
 
-    {"answer" : "X,where X is one of the letters A,B,C,D,E, or F"}
+    {"answer" : "X"}
 
     REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
     """
+
     config_list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
 
     with open(eval_file, "r") as f:
