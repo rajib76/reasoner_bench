@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from benchmark.base_benchmark import BaseBenchmark
 from benchmark.beam_reasoner_benchmark import BEAMReasonerBenchmark
+from benchmark.flash_reasoner_benchmark import FlashReasonerBenchmark
 from benchmark.lats_reasoner_benchmark import LATSReasonerBenchmark
 from benchmark.mcts_reasoner_benchmark import MCTSReasonerBenchmark
 from benchmark.o1_reasoner_benchmark import O1ReasonerBenchmark
@@ -63,23 +64,8 @@ class BenchMarkExecution(BaseModel):
 
 if __name__ == "__main__":
     eval_file = "../data/simple_bench_public.json"
-    agent_list = [MCTSReasonerBenchmark(), LATSReasonerBenchmark(), BEAMReasonerBenchmark(), O1ReasonerBenchmark()]
-    # agent_list = [BEAMReasonerBenchmark()]
-    # instructions = """
-    # Give the final answer in the below mentioned JSON FORMAT.
-    #
-    # {"answer" : "X,where X is one of the letters A,B,C,D,E, or F"}
-    #
-    # REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
-    # """
-    # instructions = """
-    # Give the final answer in the below mentioned JSON FORMAT.
-    #
-    # {"answer" : "X"}
-    #
-    # REMEMBER TO SHARE ONLY THE OUTPUT IN JSON FORMAT. DO NOT ADD ANYTHING ELSE. DO NOT ADD THE EXPLANATION OF YOUR RESPONSE.
-    # """
-
+    # agent_list = [MCTSReasonerBenchmark(), LATSReasonerBenchmark(), BEAMReasonerBenchmark(), O1ReasonerBenchmark()]
+    agent_list = [FlashReasonerBenchmark()]
     # The config list only used for the AG2 reasoining agent. for o1 reasoner,
     # o1-preview is harcoded in o1_reasoner_agent.py
     config_list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]

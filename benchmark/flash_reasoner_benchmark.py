@@ -1,15 +1,13 @@
-import ast
-import json
 from typing import ClassVar
 
 from pydantic import ConfigDict
 
 from benchmark.base_benchmark import BaseBenchmark
-from reasoner_algos.o1_reasoner_agent import O1ReasonerAgent
+from reasoner_algos.gemini_flash_reasoner_agent import GeminiFlashReasonerAgent
 
 
-class O1ReasonerBenchmark(BaseBenchmark):
-    o1_agent_class: ClassVar = O1ReasonerAgent()
+class FlashReasonerBenchmark(BaseBenchmark):
+    flash_agent_class: ClassVar = GeminiFlashReasonerAgent()
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def create_benchmark_output(self, summary_args):
@@ -55,16 +53,17 @@ class O1ReasonerBenchmark(BaseBenchmark):
             # if config_list is None:
             #     config_list: list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
 
-            self.o1_agent_class.config_list = config_list
-            o1_agent = self.o1_agent_class.return_agent()
-            completion = o1_agent.chat.completions.create(
-                model="o1-preview",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            self.flash_agent_class.config_list = config_list
+            flash_agent = self.flash_agent_class.return_agent()
+            response = flash_agent.models.generate_content(
+                model='gemini-2.0-flash-thinking-exp', contents=prompt)
 
-            response = completion.choices[0].message.content
+            for part in response.candidates[0].content.parts:
+                if part.thought == True:
+                    print(f"Model Thought:\n{part.text}\n")
+                else:
+                    print(f"\nModel Response:\n{part.text}\n")
+                    response=part.text
             print(response)
             summary_args = {"question_id": question_id, "prompt": prompt, "ground_truth": ground_truth,
                             "response": response, "out_file": out_file_name}
@@ -75,4 +74,4 @@ class O1ReasonerBenchmark(BaseBenchmark):
             # return response
 
     def return_benchmark_name(self):
-        return "o1_reasoner"
+        return "flash_reasoner"

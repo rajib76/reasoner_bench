@@ -2,3 +2,4 @@ ag2
 python-dotenv
 pydantic
 pandas
+google-genai
