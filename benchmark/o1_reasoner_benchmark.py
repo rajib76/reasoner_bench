@@ -1,5 +1,7 @@
 import ast
+import asyncio
 import json
+import os
 from typing import ClassVar
 
 from pydantic import ConfigDict
@@ -19,6 +21,7 @@ class O1ReasonerBenchmark(BaseBenchmark):
         ground_truth = summary_args["ground_truth"]
         out_file = summary_args["out_file"]
         response = summary_args["response"]
+        cost = summary_args["cost"]
         answer_option, answer_explanation = self.create_structured_output(response)
         # if "json" in response:
         #     cleaned_string = response.replace("```json", "").replace("```", "").strip()
@@ -37,6 +40,7 @@ class O1ReasonerBenchmark(BaseBenchmark):
         benchmarking_result["question_id"] = question_id
         benchmarking_result["prompt"] = prompt
         benchmarking_result["ground_truth"] = ground_truth
+        benchmarking_result["cost"] = cost
 
         self._write_benchmark_output(benchmarking_result, out_file_name=out_file)
 
@@ -63,11 +67,23 @@ class O1ReasonerBenchmark(BaseBenchmark):
                     {"role": "user", "content": prompt}
                 ]
             )
+            input_tokens = completion.usage.prompt_tokens
+            output_tokens = completion.usage.completion_tokens
+            cached_tokens = completion.usage.prompt_tokens_details.cached_tokens
+            # Not a good practice. harcoded values. TODO - MAKE THIS CONFIGURABLE LATER
+            # $15.00 / 1M input tokens
+            # $60.00 / 1M output** tokens
+            # I think I need to take care of the cached tokens also
+            input_token_cost = input_tokens*15*100/1000000
+            output_token_cost = output_tokens * 60*100/1000000
+            cached_token_cost = cached_tokens * 7.50*100/1000000
+            total_cost = input_token_cost + output_token_cost + cached_token_cost
+            print("completion " , completion.usage.total_tokens)
 
             response = completion.choices[0].message.content
             print(response)
             summary_args = {"question_id": question_id, "prompt": prompt, "ground_truth": ground_truth,
-                            "response": response, "out_file": out_file_name}
+                            "response": response, "out_file": out_file_name,"cost":total_cost}
 
             self.create_benchmark_output(summary_args)
 
@@ -76,3 +92,15 @@ class O1ReasonerBenchmark(BaseBenchmark):
 
     def return_benchmark_name(self):
         return "o1_reasoner"
+
+if __name__ == "__main__":
+    eval_file = "../data/simple_bench_public.json"
+    config_list = [{"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}]
+    with open(eval_file, "r") as f:
+        benchmark_data = json.load(f)
+    eval_data = benchmark_data["eval_data"]
+    agent = O1ReasonerBenchmark()
+    asyncio.run(agent.run_benchmark(eval_list=eval_data,
+                              instructions=None,
+                              out_file_name="o1.jsonl",
+                              config_list=config_list))

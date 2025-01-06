@@ -36,7 +36,7 @@ class BenchMarkExecution(BaseModel):
                     ground_truth = line_json["ground_truth"]
                     predicted_truth = line_json["predicted_truth"]
                     # Temporary fix below
-                    if file_name in ["beam_benchmark.jsonl","mcts_benchmark.jsonl","lats_benchmark.jsonl"]:
+                    if file_name in ["beam_benchmark.jsonl","mcts_benchmark.jsonl","lats_benchmark.jsonl","o1_reasoner.jsonl"]:
                         cost = line_json["cost"] + prev_cost
                         prev_cost = cost
                     else:
@@ -73,7 +73,9 @@ class BenchMarkExecution(BaseModel):
 
 if __name__ == "__main__":
     eval_file = "../data/simple_bench_public.json"
-    agent_list = [MCTSReasonerBenchmark(), LATSReasonerBenchmark(), BEAMReasonerBenchmark(), O1ReasonerBenchmark(),FlashReasonerBenchmark()]
+    # agent_list = [MCTSReasonerBenchmark(), LATSReasonerBenchmark(), BEAMReasonerBenchmark(), O1ReasonerBenchmark(),FlashReasonerBenchmark()]
+    agent_list = [O1ReasonerBenchmark()]
+
     # agent_list = [FlashReasonerBenchmark()]
     # The config list only used for the AG2 reasoining agent. for o1 reasoner,
     # o1-preview is harcoded in o1_reasoner_agent.py
