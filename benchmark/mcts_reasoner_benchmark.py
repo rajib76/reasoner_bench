@@ -3,6 +3,7 @@ import json
 import os
 from typing import ClassVar
 
+from autogen import gather_usage_summary
 from pydantic import ConfigDict
 
 from benchmark.base_benchmark import BaseBenchmark
@@ -79,3 +80,7 @@ class MCTSReasonerBenchmark(BaseBenchmark):
                             "out_file": out_file_name}
             user_proxy.initiate_chat(mcts_agent, message=prompt, summary_method=self.last_meaningful_msg,
                                      summary_args=summary_args)
+            usage_summary = gather_usage_summary([mcts_agent, user_proxy])
+            print("usage summary ", usage_summary)
+            total_cost = usage_summary["usage_including_cached_inference"]["total_cost"]
+            self._update_benchmark_output(total_cost, out_file_name=out_file_name)

@@ -1,3 +1,4 @@
+import ast
 import json
 import os
 from abc import abstractmethod
@@ -32,8 +33,31 @@ class BaseBenchmark(BaseModel):
         pass
 
     def _write_benchmark_output(self, json_line, out_file_name):
+        print("file name ", out_file_name)
         with open(out_file_name, "a") as f:
             f.write(json.dumps(json_line) + "\n")
+
+    def _update_benchmark_output(self,cost,out_file_name):
+        print("file name ", out_file_name)
+        with open(out_file_name, "r") as file:
+            lines = file.readlines()
+
+        updated_lines = []
+        for line in lines:
+            data = json.loads(line)
+            data["cost"] = cost
+            updated_lines.append(json.dumps(data) + '\n')
+
+        with open(out_file_name, 'w') as file:
+            file.writelines(updated_lines)
+
+            # print("line ")
+            # line = file.read()
+            # print("line ", line)
+            # line_json = ast.literal_eval(json.loads(json.dumps(line)))
+            # line_json["cost"] = cost
+            # file.write(json.dumps(line_json) + "\n")
+
 
     def create_structured_output(self, answer_content):
         completion = self.client.beta.chat.completions.parse(
